@@ -1,6 +1,7 @@
 # Hoymiles HM800W-2T Data Collection
 
 This is a script which is collecting the Outputpower of a HMS800W-2T.
+
 **Disclaimer: This library is not affiliated with Hoymiles. It is an independent project developed to provide tools for interacting with Hoymiles HMS-XXXXW-2T series micro-inverters featuring integrated WiFi DTU. Any trademarks or product names mentioned are the property of their respective owners.**
 
 ## Supported Devices
