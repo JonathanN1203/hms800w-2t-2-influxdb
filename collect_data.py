@@ -13,10 +13,7 @@ influxdb_password = ""
 influxdb_database = ""
 
 dtu = DTU(inverter_ip)
-response = asyncio.run(dtu.async_get_real_data_hms())
-
-def write_date(dtu_data):
-    print(dtu_data)
+response = asyncio.run(dtu.async_get_real_data_new())
 
 if response:
     print(response)
@@ -27,36 +24,39 @@ if response:
         {
             "measurement": "hms800w_2t_inverter",
             "tags": {
-                "dtu_sn": response.dtu_sn,
-                "inverter_sn": response.inverter_state[0].inv_id,
+                "dtu_sn": response.device_serial_number,
+                "inverter_sn": response.sgs_data[0].serial_number,
                 "dtu_location": inverter_location
             },
             "fields": {
-                "grid_voltage": response.inverter_state[0].grid_voltage / 10,
-                "grid_freq": response.inverter_state[0].grid_freq / 100,
-                "pv_current_power": response.inverter_state[0].pv_current_power / 10,
-                "pv_daily_yield": response.pv_daily_yield,
-                "temperature": response.inverter_state[0].temperature / 10
+                "pv_voltage": response.sgs_data[0].voltage / 10,
+                "pv_frequency": response.sgs_data[0].frequency / 100,
+                "pv_current_power": response.sgs_data[0].active_power / 10,
+                "pv_current": response.sgs_data[0].current / 10,
+                                "pv_power_factor": response.sgs_data[0].power_factor / 10,
+                "pv_daily_yield": response.dtu_daily_energy,
+                "pv_temperature": response.sgs_data[0].temperature / 10
             }
         }
     ]
-    for i in response.port_state:
+    for i in response.pv_data:
         json_hms800w_2t_panel = [
             {
                 "measurement": "hms800w_2t_panel",
                 "tags": {
-                    "dtu_sn": response.dtu_sn,
-                    "pv_port": i.pv_port,
+                    "dtu_sn": response.device_serial_number,
+                    "pv_port": i.port_number,
                     "dtu_location": inverter_location
                 },
                 "fields": {
-                    "pv_vol": i.pv_vol / 10,
-                    "pv_cur": i.pv_cur / 100,
-                    "pv_power": i.pv_power / 10,
-                    "pv_energy_total": i.pv_energy_total,
-                    "pv_daily_yield": i.pv_daily_yield
+                    "pv_voltage": i.voltage / 10,
+                    "pv_current": i.current / 100,
+                    "pv_current_power": i.power / 10,
+                    "pv_energy_total": i.energy_total,
+                    "pv_daily_yield": i.energy_daily
                 }
             }
         ]
         client.write_points(json_hms800w_2t_panel)
+
     client.write_points(json_hms800w_2t_inverter)
